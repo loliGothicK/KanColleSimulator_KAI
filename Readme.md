@@ -4,9 +4,10 @@
 艦これの戦闘をシミュレートします。
 
 ## 使い方
-`usage: KCS_CUI -i input1.json input2.json [-f formation1 formation2] [-n times] [-t threads] [-o output.json] [--result-json-prettify | --no-result-json-prettify]`
+`usage: KCS_CUI -i input1.json input2.json|input2.map [-f formation1 formation2] [-n times] [-t threads] [-o output.json] [--result-json-prettify | --no-result-json-prettify]`
 
-- input1.jsonは自艦隊、input2.jsonは敵艦隊かマップのデータ
+- input1.jsonは自艦隊、input2.json|input2.mapは敵艦隊かマップのデータ。  
+後者がマップのデータならマップモード、そうでないなら通常モードと呼ぶ
 - 自艦隊には連合艦隊も許容されるが、敵艦隊やマップ内の艦隊は通常艦隊のみ
 - formation1は自艦隊、formation2は敵艦隊の陣形。
 　単縦陣・複縦陣・輪形陣・梯形陣・単横陣が0～4に対応する。  
@@ -18,8 +19,9 @@
 　開幕夜戦マスは(対潜マスを除いて)formation1で指定した陣形になる
 - timesは試行回数。値が1だと艦隊の詳細も表記される。略すと1になる
 - threadsは実行スレッド数。略すとシングルスレッドで実行される
-- output.jsonを指定すると、結果を標準出力ではなくJSONに書き出すようになる。  
-また、出力形式も標準出力のような感じ(まとめ表示)ではなく各回についての結果が書き出される
+- 結果は標準出力に書き出される。マップモードなら、道中の到達率・大破撤退率も出る
+- output.jsonを指定すると、結果を標準出力だけではなくJSONに書き出すようになる。  
+なお、マップモードでは、ボスマスでの結果のみJSONに書き出される
 - --no-result-json-prettifyを指定すると、出力するJSONが整形されないようになる
 
 ## 使用例
@@ -43,9 +45,11 @@
 
 ## JSONデータの書式(マップ編)
 - UTF-8で保存してください(どうせASCII文字しか無いと思いますが)
-- 「"version": "map"」は決まり文句で、それと同じ階層で  
-マス名の連想配列→艦隊の配列→艦船(配列)・陣形・戦闘モードの連想配列となっています
-- 艦船の配列は艦船IDで、装備は初期装備です(ships.csvを参照)
+- 「"version": "map"」は決まり文句です
+- 「"position": [各マスについての情報の配列]」となっています
+- 各マスについての情報は「"name":マス名」「"pattern"：艦隊の配列」「戦闘モード」からなります
+- 艦隊の配列は、「"fleets":艦船IDの配列」「"form"：陣形」からなります
+- マップに居る艦船の装備は初期装備です(ships.csvを参照)
 - formは陣形で、上記におけるformationと意味は同じです
 - modeは戦闘モードで、0が昼夜戦闘(通常ボスマスのみ)・1が昼戦のみ・2が開幕夜戦マスです
 - 艦隊の配列は、マスに踏み込むたびにランダムで選択するためのものです
@@ -75,7 +79,7 @@
 - 探照灯による誘引率
 
 ## 注意点
-- ダメコンおよび戦闘兵食・給油艦による補給には対応していません
+- ダメコンおよび戦闘兵食・給油艦による補給には対応していません。
 - したがって、マップモードでは大破した際必ず撤退します
 - 護衛退避には対応していません
 - 補強増設には対応していません
@@ -92,8 +96,11 @@ MITライセンスとします。
 |yumetodo   |https://github.com/yumetodo   |https://twitter.com/yumetodo |
 |Cranberries|https://github.com/LoliGothick|https://twitter.com/_EnumHack|
 |sayurin    |https://github.com/sayurin    |https://twitter.com/haxe     |
+|taba       |https://github.com/taba256    |https://twitter.com/__taba__ |
 
 ## バージョン履歴
+### Ver.1.2.0
+マップモードを実装した。また、勝利判定についてのバグを修正した。
 ### Ver.1.1.1
 勝利判定が色々とおかしかったので修正。また、艦船データおよびサンプルデータを更新した。
 ### Ver.1.1.0
@@ -120,10 +127,12 @@ https://github.com/kazuho/picojson
 - 艦これの仕様は通常wiki・検証wikiなどを参考にした  
 http://wikiwiki.jp/kancolle/  
 http://ja.kancolle.wikia.com/wiki/%E8%89%A6%E3%81%93%E3%82%8C_%E6%A4%9C%E8%A8%BCWiki  
-https://github.com/andanteyk/ElectronicObserver/blob/master/ElectronicObserver/Other/Information/kcmemo.md#%E8%89%A6%E3%81%93%E3%82%8C%E3%81%AE%E4%BB%95%E6%A7%98%E3%81%AB%E9%96%A2%E3%81%99%E3%82%8B%E9%9B%91%E5%A4%9A%E3%81%AA%E3%83%A1%E3%83%A2
-http://kancollecalc.web.fc2.com/damage_formula.html
-http://bs-arekore.at.webry.info/201502/article_4.html
-https://twitter.com/Xe_UCH/status/705281106011029505
-http://ch.nicovideo.jp/biikame/blomaga/ar850895
+https://github.com/andanteyk/ElectronicObserver/blob/master/ElectronicObserver/Other/Information/kcmemo.md#%E8%89%A6%E3%81%93%E3%82%8C%E3%81%AE%E4%BB%95%E6%A7%98%E3%81%AB%E9%96%A2%E3%81%99%E3%82%8B%E9%9B%91%E5%A4%9A%E3%81%AA%E3%83%A1%E3%83%A2  
+http://kancollecalc.web.fc2.com/damage_formula.html  
+http://bs-arekore.at.webry.info/201502/article_4.html  
+https://twitter.com/Xe_UCH/status/705281106011029505  
+http://ch.nicovideo.jp/biikame/blomaga/ar850895  
+https://docs.google.com/spreadsheets/d/1O91DpCaHbjCZV2jy1GlMyqjwyWULdjK5kwhYALPFJGE/edit  
+http://ch.nicovideo.jp/umya/blomaga/ar899278
 - おのれSourceTree……勝手に特定拡張子を自動で除外するとは……  
 http://tech.nitoyon.com/ja/blog/2013/04/05/sourcetree/
